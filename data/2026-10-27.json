@@ -52,6 +52,19 @@
   "published": "2026-10-26T12:20:00+00:00"
  },
  {
+  "project": "Nhà máy đốt rác phát điện",
+  "investor": "",
+  "status": "Điều chỉnh / Mở rộng / Tăng vốn",
+  "capital": "",
+  "province": "Bình Định",
+  "province_new": "Gia Lai",
+  "link": "https://vnexpress.net/gia-lai-nang-cong-suat-nha-may-dot-rac-phat-dien-5136743.html",
+  "title": "Gia Lai nâng công suất nhà máy đốt rác phát điện",
+  "source": "vnexpress.net",
+  "origin": "bing",
+  "published": "2026-10-25T18:41:00+00:00"
+ },
+ {
   "project": "Nhà máy bia lớn nhất châu Á",
   "investor": "Tập đoàn Carlsberg",
   "status": "Điều chỉnh / Mở rộng / Tăng vốn",
@@ -180,5 +193,31 @@
   "source": "quangngai.gov.vn",
   "origin": "google",
   "published": "2026-10-26T08:38:35+00:00"
+ },
+ {
+  "project": "Dự án LNG Quảng Trạch III",
+  "investor": "",
+  "status": "Khác",
+  "capital": "26.197 tỷ đồng",
+  "province": "Quảng Bình",
+  "province_new": "Quảng Trị",
+  "link": "https://baodauthau.vn/sap-moi-thau-quoc-te-goi-thau-epc-26197-ty-dong-du-an-lng-quang-trach-iii-post210887.html",
+  "title": "Sắp mời thầu quốc tế Gói thầu EPC 26.197 tỷ đồng Dự án LNG Quảng Trạch III",
+  "source": "Báo Đấu thầu",
+  "origin": "google",
+  "published": "2026-10-26T02:14:07+00:00"
+ },
+ {
+  "project": "Dự án Nhà máy nước Kiểm Lâm",
+  "investor": "",
+  "status": "Khác",
+  "capital": "456 tỷ đồng",
+  "province": "Đà Nẵng",
+  "province_new": "Đà Nẵng",
+  "link": "https://baodauthau.vn/da-nang-se-dau-thau-chon-nha-dau-tu-du-an-nha-may-nuoc-kiem-lam-456-ty-dong-post210890.html",
+  "title": "Đà Nẵng sẽ đấu thầu chọn nhà đầu tư Dự án Nhà máy nước Kiểm Lâm 456 tỷ đồng",
+  "source": "baodauthau.vn",
+  "origin": "bing",
+  "published": "2026-10-25T17:00:00+00:00"
  }
 ]
