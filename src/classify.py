@@ -123,7 +123,7 @@ GEMINI_PROMPT = """Bạn là chuyên viên phân tích đầu tư khu công nghi
 Dưới đây là danh sách tin tức (JSON, mỗi tin có "i", "title", "summary").
 Với MỖI tin, trả về một object JSON:
 - "i": giữ nguyên
-- "relevant": true CHỈ KHI tin nói về MỘT dự án cụ thể thuộc lĩnh vực SẢN XUẤT CÔNG NGHIỆP (nhà máy sản xuất, chế biến, gia công, lắp ráp, cơ khí, điện tử, dệt may, hóa chất, dược phẩm, vật liệu...) hoặc hạ tầng khu/cụm công nghiệp. false với: nhà ở thương mại, nhà ở xã hội, khu đô thị, khu dân cư, tái định cư, trung tâm thương mại, du lịch, khách sạn, đầu tư công, giao thông (quốc lộ, cao tốc, cầu, sân bay, đường băng, cảng), logistics, y tế, giáo dục, lương, ngân sách, nhà máy nước, xử lý rác, tin thống kê/chính sách chung chung
+- "relevant": true CHỈ KHI tin nói về MỘT dự án cụ thể thuộc lĩnh vực SẢN XUẤT CÔNG NGHIỆP (nhà máy sản xuất, chế biến, gia công, lắp ráp, cơ khí, điện tử, dệt may, hóa chất, dược phẩm, vật liệu...) hoặc hạ tầng khu/cụm công nghiệp, hoặc xây dựng/mở rộng nhà máy nước, nhà máy xử lý rác/đốt rác, nhà máy/kho LNG, điện khí LNG, điện sinh khối. false với: nhà ở thương mại, nhà ở xã hội, khu đô thị, khu dân cư, tái định cư, trung tâm thương mại, du lịch, khách sạn, đầu tư công, giao thông (quốc lộ, cao tốc, cầu, sân bay, đường băng, cảng), logistics, y tế, giáo dục, lương, ngân sách, tin thống kê/chính sách chung chung
 - "project": tên dự án ngắn gọn (vd "Nhà máy sản xuất lốp xe ABC"), "" nếu không rõ
 - "investor": tên chủ đầu tư (công ty/tập đoàn, kèm quốc tịch nếu có trong tin), "" nếu không rõ
 - "status": một trong ["Đề xuất / Nghiên cứu đầu tư","Chấp thuận chủ trương đầu tư","Cấp GCN đăng ký đầu tư","Điều chỉnh / Mở rộng / Tăng vốn","Khởi công","Khánh thành / Đi vào hoạt động","Khác"]

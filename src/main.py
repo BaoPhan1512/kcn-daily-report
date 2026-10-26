@@ -143,6 +143,42 @@ def cmd_chatid():
         print(f"ID: {cid}  |  loại: {c.get('type')}  |  tên: {c.get('title') or c.get('first_name')}  |  @{c.get('username', '')}")
 
 
+def cmd_check():
+    """Kiểm tra các Secrets: Telegram token, chat id, Gemini key (không in giá trị key)."""
+    ok = True
+    token, chat, gkey = (os.environ.get(k, "").strip() for k in ("TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "GEMINI_API_KEY"))
+    if not token:
+        ok = False
+        print("❌ Thiếu TELEGRAM_BOT_TOKEN")
+    else:
+        me = requests.get(f"https://api.telegram.org/bot{token}/getMe", timeout=30).json()
+        print(f"✅ Token Telegram đúng, bot @{me['result']['username']}" if me.get("ok") else f"❌ Token Telegram sai: {me.get('description')}")
+        ok &= bool(me.get("ok"))
+        if not chat:
+            ok = False
+            print("❌ Thiếu TELEGRAM_CHAT_ID")
+        else:
+            c = requests.get(f"https://api.telegram.org/bot{token}/getChat", params={"chat_id": chat}, timeout=30).json()
+            print(f"✅ Chat id đúng: {c['result'].get('title') or c['result'].get('first_name')}" if c.get("ok") else f"❌ Chat id sai: {c.get('description')}")
+            ok &= bool(c.get("ok"))
+    if not gkey:
+        print("⚠️ Chưa có GEMINI_API_KEY (bot vẫn chạy bằng luật từ khóa)")
+    else:
+        cfg = load_json(os.path.join(ROOT, "config.json"), {})
+        model = cfg.get("gemini_model", "gemini-2.5-flash")
+        r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                          headers={"x-goog-api-key": gkey}, timeout=60,
+                          json={"contents": [{"parts": [{"text": "Trả lời đúng một từ: OK"}]}]})
+        if r.ok:
+            print(f"✅ Gemini key hoạt động (model {model}, dài {len(gkey)} ký tự)")
+        else:
+            ok = False
+            msg = r.json().get("error", {}).get("message", r.text[:200]) if r.headers.get("content-type", "").startswith("application/json") else r.text[:200]
+            print(f"❌ Gemini key lỗi {r.status_code}: {msg}")
+    if not ok:
+        raise SystemExit(1)
+
+
 def cmd_demo():
     cfg = load_json(os.path.join(ROOT, "config.json"), None)
     items = load_json(os.path.join(ROOT, "data", "sample.json"), [])
@@ -152,4 +188,4 @@ def cmd_demo():
 
 
 if __name__ == "__main__":
-    {"collect": cmd_collect, "send": cmd_send, "demo": cmd_demo, "chatid": cmd_chatid}[sys.argv[1] if len(sys.argv) > 1 else "collect"]()
+    {"collect": cmd_collect, "send": cmd_send, "demo": cmd_demo, "chatid": cmd_chatid, "check": cmd_check}[sys.argv[1] if len(sys.argv) > 1 else "collect"]()

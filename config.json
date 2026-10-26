@@ -302,7 +302,21 @@
       "kính",
       "năng lượng mới",
       "hydrogen",
-      "bột giấy"
+      "bột giấy",
+      "nhà máy nước",
+      "nước sạch",
+      "xử lý nước",
+      "nhà máy xử lý rác",
+      "xử lý rác",
+      "đốt rác",
+      "rác thải",
+      "điện rác",
+      "lng",
+      "điện khí",
+      "khí hóa lỏng",
+      "sinh khối",
+      "điện sinh khối",
+      "viên nén"
     ],
     "industrial_zone": [
       "khu công nghiệp",
@@ -371,12 +385,6 @@
       "đại đoàn kết",
       "hộ nghèo",
       "nghĩa trang",
-      "nhà máy nước",
-      "nước sạch",
-      "xử lý nước",
-      "đốt rác",
-      "xử lý rác",
-      "rác thải sinh hoạt",
       "điểm đen"
     ]
   }

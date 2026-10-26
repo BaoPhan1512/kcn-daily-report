@@ -28,7 +28,10 @@ CASES = [
     ("Dự án đường băng hơn 3.200 tỷ đồng tại sân bay Phù Cát sắp xong", None, None),
     ("Phê duyệt chủ trương đầu tư khu đô thị mới 2.000 tỷ đồng tại Quảng Ngãi", None, None),
     ("Hà Tĩnh chấp thuận chủ trương đầu tư trung tâm logistics 39.600 tỷ đồng", None, None),
-    ("Đà Nẵng sẽ đấu thầu chọn nhà đầu tư Dự án Nhà máy nước Kiểm Lâm 456 tỷ đồng", None, None),
+    ("Đà Nẵng sẽ đấu thầu chọn nhà đầu tư Dự án Nhà máy nước Kiểm Lâm 456 tỷ đồng", "Đà Nẵng", "Khác"),
+    ("Gia Lai nâng công suất nhà máy đốt rác phát điện tại Quy Nhơn", "Bình Định", "Điều chỉnh / Mở rộng / Tăng vốn"),
+    ("Sắp mời thầu quốc tế Gói thầu EPC 26.197 tỷ đồng Dự án LNG Quảng Trạch III", "Quảng Bình", "Khác"),
+    ("Khởi công nhà máy điện sinh khối 50 MW tại KCN Phong Điền", "Huế", "Khởi công"),
     ("Carlsberg rót thêm 65 triệu USD vào nhà máy bia lớn nhất châu Á tại Huế", "Huế", "Điều chỉnh / Mở rộng / Tăng vốn"),
     ("Cấp chứng nhận đầu tư dự án công nghiệp hơn 2.373 tỷ đồng tại Khu công nghiệp Bắc Thạch Hà", "Hà Tĩnh", "Cấp GCN đăng ký đầu tư"),
 ]
