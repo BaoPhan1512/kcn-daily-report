@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: kcn-report
@@ -34,3 +35,8 @@ jobs:
           git add data reports
           git commit -m "Báo cáo $(TZ=Asia/Ho_Chi_Minh date -d '+6 hours' +%F)" || echo "Không có thay đổi"
           git push
+      - name: Giữ lịch chạy luôn bật (GitHub tự tắt lịch sau 60 ngày repo không hoạt động)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow enable collect.yml && gh workflow enable send.yml || true
