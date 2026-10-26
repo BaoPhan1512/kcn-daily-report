@@ -1,0 +1,12 @@
+{
+  "_ghi_chu": "Trang tin của các Ban quản lý KCN/KKT. Bot lấy các link có tiêu đề chứa từ khóa đầu tư. Link chết sẽ tự bỏ qua (xem log trong tab Actions). Lần đầu quét một trang, bot chỉ ghi nhớ tin cũ, từ lần sau mới báo tin mới. Hãy kiểm tra và sửa URL cho đúng trang 'Tin tức' của từng BQL.",
+  "sites": [
+    {"name": "BQL KKT Hà Tĩnh", "province": "Hà Tĩnh", "url": "https://kkt.hatinh.gov.vn"},
+    {"name": "BQL KKT Quảng Trị", "province": "Quảng Trị", "url": "https://bqlkkt.quangtri.gov.vn"},
+    {"name": "BQL KKT & CN Huế", "province": "Huế", "url": "https://bqlkkt.hue.gov.vn"},
+    {"name": "BQL Khu CNC & các KCN Đà Nẵng", "province": "Đà Nẵng", "url": "https://dhpiza.danang.gov.vn"},
+    {"name": "BQL KKT Dung Quất & các KCN Quảng Ngãi", "province": "Quảng Ngãi", "url": "https://dungquat.quangngai.gov.vn"},
+    {"name": "BQL KKT Bình Định (nay Gia Lai)", "province": "Bình Định", "url": "https://kkt.binhdinh.gov.vn"},
+    {"name": "BQL KKT Gia Lai", "province": "Gia Lai", "url": "https://bqlkkt.gialai.gov.vn"}
+  ]
+}
