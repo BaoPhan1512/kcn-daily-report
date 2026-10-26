@@ -171,7 +171,7 @@ def gemini_enrich(items, model):
         }
         for attempt in range(3):
             try:
-                r = requests.post(url, json=body, headers={"x-goog-api-key": key}, timeout=120)
+                r = requests.post(url, json=body, headers={"x-goog-api-key": key}, timeout=300)
                 if r.status_code == 429:
                     time.sleep(30)
                     continue

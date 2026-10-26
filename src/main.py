@@ -167,9 +167,13 @@ def cmd_check():
         cfg = load_json(os.path.join(ROOT, "config.json"), {})
         from classify import API, pick_gemini_model
         model = pick_gemini_model(gkey, cfg.get("gemini_model", "gemini-2.5-flash"))
-        r = requests.post(f"{API}/models/{model}:generateContent",
-                          headers={"x-goog-api-key": gkey}, timeout=60,
-                          json={"contents": [{"parts": [{"text": "Trả lời đúng một từ: OK"}]}]})
+        print(f"   Đang thử Gemini model {model}...")
+        try:
+            r = requests.post(f"{API}/models/{model}:generateContent",
+                              headers={"x-goog-api-key": gkey}, timeout=240,
+                              json={"contents": [{"parts": [{"text": "Trả lời đúng một từ: OK"}]}]})
+        except requests.RequestException as e:
+            raise SystemExit(f"❌ Gemini không phản hồi: {e}")
         if r.ok:
             print(f"✅ Gemini key hoạt động (model {model}, dài {len(gkey)} ký tự)")
         else:
