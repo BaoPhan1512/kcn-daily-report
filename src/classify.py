@@ -137,30 +137,54 @@ TIN TỨC:
 API = "https://generativelanguage.googleapis.com/v1beta"
 
 
-def pick_gemini_model(key, preferred):
-    """Chọn bản Gemini Flash mới nhất trong danh sách của Google (model cũ có thể vẫn được liệt kê nhưng
-    đã khóa với key mới). Model trong config chỉ dùng khi không lấy được danh sách."""
+def gemini_models(key, preferred):
+    """Các bản Gemini Flash còn dùng được, mới nhất trước (model cũ có thể vẫn được liệt kê nhưng đã khóa
+    với key mới). Bản lite để cuối làm dự phòng khi bản chính quá tải."""
     try:
         r = requests.get(f"{API}/models", headers={"x-goog-api-key": key}, params={"pageSize": 200}, timeout=30)
         r.raise_for_status()
         names = [m["name"].split("/", 1)[1] for m in r.json().get("models", [])
                  if "generateContent" in m.get("supportedGenerationMethods", [])]
     except Exception:
-        return preferred
-    flash = [n for n in names if re.fullmatch(r"gemini-[\d.]+-flash", n)] or [n for n in names if "flash" in n and "lite" not in n]
+        return [preferred]
 
     def ver(n):
         return tuple(int(x) for x in re.findall(r"\d+", n.split("flash")[0]))
-    return max(flash, key=ver) if flash else preferred
+    main = sorted((n for n in names if re.fullmatch(r"gemini-[\d.]+-flash", n)), key=ver, reverse=True)
+    lite = sorted((n for n in names if re.fullmatch(r"gemini-[\d.]+-flash-lite", n)), key=ver, reverse=True)
+    return (main[:3] + lite[:2]) or [preferred]
+
+
+def gemini_call(key, models, body, timeout=300):
+    """Gọi Gemini, tự chuyển sang model khác khi quá tải (503), bị ngừng (404) hoặc hết hạn mức (429).
+    Trả về (model, response_json); ném lỗi nếu mọi model đều thất bại."""
+    last = None
+    for model in models:
+        for attempt in range(2):
+            try:
+                r = requests.post(f"{API}/models/{model}:generateContent", json=body,
+                                  headers={"x-goog-api-key": key}, timeout=timeout)
+            except requests.RequestException as e:
+                last = f"{model}: {e}"
+                break
+            if r.ok:
+                return model, r.json()
+            last = f"{model}: HTTP {r.status_code} {r.text[:200]}"
+            if r.status_code in (400, 401, 403):
+                raise RuntimeError(last)  # key sai: đổi model cũng vô ích
+            if r.status_code in (429, 500, 503) and attempt == 0:
+                time.sleep(15)
+                continue
+            break
+    raise RuntimeError(last)
 
 
 def gemini_enrich(items, model):
     key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not key or not items:
         return {}
-    model = pick_gemini_model(key, model)
-    print(f"  Gemini model: {model}")
-    url = f"{API}/models/{model}:generateContent"
+    models = gemini_models(key, model)
+    print(f"  Gemini models: {', '.join(models)}")
     out = {}
     for start in range(0, len(items), 25):
         batch = [{"i": start + k, "title": it["title"], "summary": it["summary"][:400]}
@@ -169,20 +193,13 @@ def gemini_enrich(items, model):
             "contents": [{"parts": [{"text": GEMINI_PROMPT + json.dumps(batch, ensure_ascii=False)}]}],
             "generationConfig": {"responseMimeType": "application/json", "temperature": 0},
         }
-        for attempt in range(3):
-            try:
-                r = requests.post(url, json=body, headers={"x-goog-api-key": key}, timeout=300)
-                if r.status_code == 429:
-                    time.sleep(30)
-                    continue
-                r.raise_for_status()
-                text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
-                for row in json.loads(text):
-                    out[int(row["i"])] = row
-                break
-            except Exception as e:
-                print(f"  [!] Gemini lỗi lô {start}: {e}")
-                time.sleep(5)
+        try:
+            used, data = gemini_call(key, models, body)
+            models = [used] + [m for m in models if m != used]  # lô sau dùng luôn model vừa chạy được
+            for row in json.loads(data["candidates"][0]["content"]["parts"][0]["text"]):
+                out[int(row["i"])] = row
+        except Exception as e:
+            print(f"  [!] Gemini lỗi lô {start}, dùng luật thay thế: {e}")
         time.sleep(5)  # tôn trọng giới hạn gói miễn phí
     return out
 

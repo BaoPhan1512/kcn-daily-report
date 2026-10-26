@@ -165,21 +165,19 @@ def cmd_check():
         print("⚠️ Chưa có GEMINI_API_KEY (bot vẫn chạy bằng luật từ khóa)")
     else:
         cfg = load_json(os.path.join(ROOT, "config.json"), {})
-        from classify import API, pick_gemini_model
-        model = pick_gemini_model(gkey, cfg.get("gemini_model", "gemini-2.5-flash"))
-        print(f"   Đang thử Gemini model {model}...")
+        from classify import gemini_call, gemini_models
+        models = gemini_models(gkey, cfg.get("gemini_model", "gemini-2.5-flash"))
+        print(f"   Thử lần lượt: {', '.join(models)}")
         try:
-            r = requests.post(f"{API}/models/{model}:generateContent",
-                              headers={"x-goog-api-key": gkey}, timeout=240,
-                              json={"contents": [{"parts": [{"text": "Trả lời đúng một từ: OK"}]}]})
-        except requests.RequestException as e:
-            raise SystemExit(f"❌ Gemini không phản hồi: {e}")
-        if r.ok:
-            print(f"✅ Gemini key hoạt động (model {model}, dài {len(gkey)} ký tự)")
-        else:
-            ok = False
-            msg = r.json().get("error", {}).get("message", r.text[:200]) if r.headers.get("content-type", "").startswith("application/json") else r.text[:200]
-            print(f"❌ Gemini key lỗi {r.status_code}: {msg}")
+            used, _ = gemini_call(gkey, models, {"contents": [{"parts": [{"text": "Trả lời đúng một từ: OK"}]}]}, timeout=240)
+            print(f"✅ Gemini key hoạt động (model {used})")
+        except RuntimeError as e:
+            msg = str(e)
+            if any(f"HTTP {c}" in msg for c in (400, 401, 403)):
+                ok = False
+                print(f"❌ Gemini key sai hoặc chưa được bật: {msg}")
+            else:
+                print(f"⚠️ Key hợp lệ nhưng Gemini đang quá tải, bot sẽ tự thử lại khi chạy: {msg}")
     if not ok:
         raise SystemExit(1)
 
