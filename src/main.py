@@ -165,8 +165,9 @@ def cmd_check():
         print("⚠️ Chưa có GEMINI_API_KEY (bot vẫn chạy bằng luật từ khóa)")
     else:
         cfg = load_json(os.path.join(ROOT, "config.json"), {})
-        model = cfg.get("gemini_model", "gemini-2.5-flash")
-        r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+        from classify import API, pick_gemini_model
+        model = pick_gemini_model(gkey, cfg.get("gemini_model", "gemini-2.5-flash"))
+        r = requests.post(f"{API}/models/{model}:generateContent",
                           headers={"x-goog-api-key": gkey}, timeout=60,
                           json={"contents": [{"parts": [{"text": "Trả lời đúng một từ: OK"}]}]})
         if r.ok:

@@ -134,11 +134,34 @@ TIN TỨC:
 """
 
 
+API = "https://generativelanguage.googleapis.com/v1beta"
+
+
+def pick_gemini_model(key, preferred):
+    """Dùng model trong config nếu còn; nếu Google đã ngừng thì tự chọn bản Flash mới nhất còn dùng được."""
+    try:
+        r = requests.get(f"{API}/models", headers={"x-goog-api-key": key}, params={"pageSize": 200}, timeout=30)
+        r.raise_for_status()
+        names = [m["name"].split("/", 1)[1] for m in r.json().get("models", [])
+                 if "generateContent" in m.get("supportedGenerationMethods", [])]
+    except Exception:
+        return preferred
+    if preferred in names:
+        return preferred
+    flash = [n for n in names if re.fullmatch(r"gemini-[\d.]+-flash", n)] or [n for n in names if "flash" in n and "lite" not in n]
+
+    def ver(n):
+        return tuple(int(x) for x in re.findall(r"\d+", n.split("flash")[0]))
+    return max(flash, key=ver) if flash else preferred
+
+
 def gemini_enrich(items, model):
-    key = os.environ.get("GEMINI_API_KEY")
+    key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not key or not items:
         return {}
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+    model = pick_gemini_model(key, model)
+    print(f"  Gemini model: {model}")
+    url = f"{API}/models/{model}:generateContent"
     out = {}
     for start in range(0, len(items), 25):
         batch = [{"i": start + k, "title": it["title"], "summary": it["summary"][:400]}
