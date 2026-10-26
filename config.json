@@ -263,7 +263,7 @@
   ],
   "lookback_hours": 30,
   "max_items_in_report": 150,
-  "gemini_model": "gemini-2.5-flash",
+  "gemini_model": "gemini-3.8-flash",
   "industry_filter": {
     "_ghi_chu": "Tin được giữ nếu có từ trong 'manufacturing' hoặc 'industrial_zone'. Tiêu đề có từ trong 'non_industrial' bị loại, trừ khi tiêu đề nói rõ nhà máy/sản xuất. Tiêu đề có từ trong 'always_exclude' luôn bị loại.",
     "manufacturing": [

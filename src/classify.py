@@ -138,15 +138,14 @@ API = "https://generativelanguage.googleapis.com/v1beta"
 
 
 def pick_gemini_model(key, preferred):
-    """Dùng model trong config nếu còn; nếu Google đã ngừng thì tự chọn bản Flash mới nhất còn dùng được."""
+    """Chọn bản Gemini Flash mới nhất trong danh sách của Google (model cũ có thể vẫn được liệt kê nhưng
+    đã khóa với key mới). Model trong config chỉ dùng khi không lấy được danh sách."""
     try:
         r = requests.get(f"{API}/models", headers={"x-goog-api-key": key}, params={"pageSize": 200}, timeout=30)
         r.raise_for_status()
         names = [m["name"].split("/", 1)[1] for m in r.json().get("models", [])
                  if "generateContent" in m.get("supportedGenerationMethods", [])]
     except Exception:
-        return preferred
-    if preferred in names:
         return preferred
     flash = [n for n in names if re.fullmatch(r"gemini-[\d.]+-flash", n)] or [n for n in names if "flash" in n and "lite" not in n]
 
