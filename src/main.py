@@ -37,8 +37,11 @@ def save_json(path, obj):
         json.dump(obj, f, ensure_ascii=False, indent=1)
 
 
+REPORT_PREFIX = "Daily Report_New Project_"
+
+
 def pdf_path(date_str):
-    return os.path.join(ROOT, "reports", f"BaoCao_DuAnMoi_{date_str}.pdf")
+    return os.path.join(ROOT, "reports", f"{REPORT_PREFIX}{date_str}.pdf")
 
 
 def seen_key(it):
@@ -104,8 +107,9 @@ def cmd_send():
     path = pdf_path(date_str)
     if not os.path.exists(path):
         # Chạy thử bằng tay trước 0h: báo cáo mới nhất mang ngày mai
-        newer = sorted(f[15:25] for f in os.listdir(os.path.join(ROOT, "reports"))
-                       if f.startswith("BaoCao_DuAnMoi_") and f[15:25] > date_str)
+        n = len(REPORT_PREFIX)
+        newer = sorted(f[n:n + 10] for f in os.listdir(os.path.join(ROOT, "reports"))
+                       if f.startswith(REPORT_PREFIX) and f[n:n + 4].isdigit() and f[n:n + 10] > date_str)
         if newer:
             date_str, path = newer[-1], pdf_path(newer[-1])
     if not os.path.exists(path):
@@ -185,7 +189,7 @@ def cmd_check():
 def cmd_demo():
     cfg = load_json(os.path.join(ROOT, "config.json"), None)
     items = load_json(os.path.join(ROOT, "data", "sample.json"), [])
-    out = os.path.join(ROOT, "reports", "BaoCao_MAU.pdf")
+    out = os.path.join(ROOT, "reports", f"{REPORT_PREFIX}SAMPLE.pdf")
     build_pdf(items, cfg, out, datetime.now(VN).strftime("%Y-%m-%d"), False)
     print(out)
 
