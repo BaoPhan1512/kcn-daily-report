@@ -8,6 +8,7 @@
 import json
 import os
 import sys
+import time
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 
@@ -49,6 +50,22 @@ def seen_key(it):
     return f"{it['province']}|{strip_accents(norm(it['project']))[:60]}|{it['status']}"
 
 
+# Lịch của GitHub có thể trễ hoặc bỏ lượt, nên mỗi việc được lên lịch nhiều lần; file đánh dấu
+# giúp chỉ lượt đầu tiên thực sự chạy. Chạy bằng tay (Run workflow) thì luôn chạy.
+SCHEDULED = os.environ.get("GITHUB_EVENT_NAME") == "schedule"
+
+
+def marker(kind, date_str):
+    return os.path.join(ROOT, "data", kind, f"{date_str}.txt")
+
+
+def write_marker(kind, date_str):
+    path = marker(kind, date_str)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
+        f.write(datetime.now(VN).isoformat())
+
+
 def cmd_collect():
     from collect import collect_all, resolve_google_link
 
@@ -56,6 +73,9 @@ def cmd_collect():
     sites = load_json(os.path.join(ROOT, "sites.json"), {}).get("sites", [])
     now = datetime.now(VN)
     report_date = (now + timedelta(hours=6)).strftime("%Y-%m-%d")  # chạy 21h -> báo cáo cho sáng mai
+    if SCHEDULED and os.path.exists(marker("collected", report_date)):
+        print(f"Báo cáo {report_date} đã được tạo ở lượt trước, bỏ qua.")
+        return
 
     print("Thu thập tin...")
     raw = collect_all(cfg, sites)
@@ -91,6 +111,7 @@ def cmd_collect():
     save_json(data_path, fresh)
 
     build_pdf(fresh, cfg, pdf_path(report_date), report_date, bool(os.environ.get("GEMINI_API_KEY")))
+    write_marker("collected", report_date)
     print(f"Đã tạo {pdf_path(report_date)} với {len(fresh)} dự án.")
 
 
@@ -101,9 +122,23 @@ def tg(method, **kw):
         raise SystemExit(f"Telegram lỗi {r.status_code}: {r.text[:300]}")
 
 
+SEND_AT = (6, 15)        # giờ gửi (giờ VN)
+LAST_TRY = (7, 15)       # sau giờ này mà vẫn chưa có báo cáo thì báo lỗi vào nhóm
+
+
 def cmd_send():
     chat = os.environ["TELEGRAM_CHAT_ID"]
-    date_str = datetime.now(VN).strftime("%Y-%m-%d")
+    now = datetime.now(VN)
+    date_str = now.strftime("%Y-%m-%d")
+    if SCHEDULED:
+        if os.path.exists(marker("sent", date_str)):
+            print(f"Báo cáo {date_str} đã gửi ở lượt trước, bỏ qua.")
+            return
+        send_at = now.replace(hour=SEND_AT[0], minute=SEND_AT[1], second=0, microsecond=0)
+        if now < send_at:
+            wait = (send_at - now).total_seconds()
+            print(f"Lượt chạy sớm, chờ {wait / 60:.0f} phút đến {SEND_AT[0]:02d}:{SEND_AT[1]:02d}...")
+            time.sleep(wait)
     path = pdf_path(date_str)
     if not os.path.exists(path):
         # Chạy thử bằng tay trước 0h: báo cáo mới nhất mang ngày mai
@@ -113,7 +148,11 @@ def cmd_send():
         if newer:
             date_str, path = newer[-1], pdf_path(newer[-1])
     if not os.path.exists(path):
+        if SCHEDULED and (datetime.now(VN).hour, datetime.now(VN).minute) < LAST_TRY:
+            print("Chưa có báo cáo, để lượt dự phòng sau thử lại.")
+            return
         tg("sendMessage", data={"chat_id": chat, "text": f"⚠️ Chưa có báo cáo ngày {date_str} (lượt thu thập 21h có thể bị lỗi). Kiểm tra tab Actions trên GitHub."})
+        write_marker("sent", date_str)
         return
     items = load_json(os.path.join(ROOT, "data", f"{date_str}.json"), [])
     by_status = Counter(i["status"] for i in items)
@@ -126,6 +165,7 @@ def cmd_send():
     with open(path, "rb") as f:
         tg("sendDocument", data={"chat_id": chat, "caption": "\n".join(lines)[:1000]},
            files={"document": (os.path.basename(path), f, "application/pdf")})
+    write_marker("sent", date_str)
     print("Đã gửi Telegram.")
 
 

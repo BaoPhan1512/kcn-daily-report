@@ -1,12 +1,19 @@
 name: Gui bao cao 6h15
 
 on:
+  # Lịch GitHub hay trễ 10-60 phút, nên lượt đầu khởi động sớm lúc 05:40 (giờ VN) rồi tự chờ
+  # đến đúng 06:15 mới gửi. Các lượt sau (06:05, 06:25, 06:50, 07:30) là dự phòng, chỉ gửi nếu
+  # chưa lượt nào gửi được.
   schedule:
-    - cron: "15 23 * * *"  # 23:15 UTC = 06:15 giờ Việt Nam hôm sau
+    - cron: "40 22 * * *"
+    - cron: "5 23 * * *"
+    - cron: "25 23 * * *"
+    - cron: "50 23 * * *"
+    - cron: "30 0 * * *"
   workflow_dispatch: {}
 
 permissions:
-  contents: read
+  contents: write
   actions: write
 
 concurrency:
@@ -16,7 +23,7 @@ concurrency:
 jobs:
   send:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,11 +31,20 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -r requirements.txt
+      - name: Lấy bản mới nhất (lượt dự phòng cần biết lượt trước đã gửi chưa)
+        run: git pull --ff-only origin main
       - name: Gửi PDF qua Telegram
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python src/main.py send
+      - name: Ghi nhận đã gửi
+        run: |
+          git config user.name "kcn-report-bot"
+          git config user.email "kcn-report-bot@users.noreply.github.com"
+          git add data
+          git commit -m "Đã gửi báo cáo $(TZ=Asia/Ho_Chi_Minh date +%F)" || exit 0
+          for i in 1 2 3; do git push && break || (git pull --rebase origin main && sleep 5); done
       - name: Giữ lịch chạy luôn bật (GitHub tự tắt lịch sau 60 ngày repo không hoạt động)
         if: always()
         env:

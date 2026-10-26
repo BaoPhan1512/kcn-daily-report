@@ -1,8 +1,12 @@
 name: Thu thap tin 21h
 
 on:
+  # Lịch GitHub có thể trễ hoặc bỏ lượt, nên đặt thêm 2 lượt dự phòng.
+  # Lượt nào chạy được trước thì làm, các lượt sau tự bỏ qua (giờ VN: 21:00, 21:40, 22:30).
   schedule:
-    - cron: "0 14 * * *"   # 14:00 UTC = 21:00 giờ Việt Nam
+    - cron: "0 14 * * *"
+    - cron: "40 14 * * *"
+    - cron: "30 15 * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -24,6 +28,8 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -r requirements.txt
+      - name: Lấy bản mới nhất (lượt dự phòng cần thấy kết quả của lượt trước)
+        run: git pull --ff-only origin main
       - name: Thu thập, phân loại, xuất PDF
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -34,7 +40,7 @@ jobs:
           git config user.email "kcn-report-bot@users.noreply.github.com"
           git add data reports
           git commit -m "Báo cáo $(TZ=Asia/Ho_Chi_Minh date -d '+6 hours' +%F)" || echo "Không có thay đổi"
-          git push
+          for i in 1 2 3; do git push && break || (git pull --rebase origin main && sleep 5); done
       - name: Giữ lịch chạy luôn bật (GitHub tự tắt lịch sau 60 ngày repo không hoạt động)
         if: always()
         env:
