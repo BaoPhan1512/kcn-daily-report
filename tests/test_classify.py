@@ -21,6 +21,16 @@ CASES = [
     ("Khởi công nhà máy chế biến gỗ tại KCN Tây Bắc Đồng Hới, tỉnh Quảng Trị", "Quảng Bình", "Khởi công"),
     ("Đà Nẵng trao chủ trương đầu tư dự án Nhà máy điện tử tại KCN Điện Nam - Điện Ngọc", "Quảng Nam", "Chấp thuận chủ trương đầu tư"),
     ("Giá vàng hôm nay tại Đà Nẵng tăng mạnh", None, None),
+    ("Đà Nẵng chấp thuận thí điểm hai dự án nhà ở thương mại, tổng vốn hơn 7.300 tỷ đồng", None, None),
+    ("Huế đề xuất bổ sung hơn 58 tỷ đồng trả lương nhân viên y tế", None, None),
+    ("Huế đề xuất đầu tư 110 tỷ đồng xử lý 71 \"điểm đen\" trên Quốc lộ 49", None, None),
+    ("Người dân Gia Lai đón tin vui: Chính thức khởi công đoạn cao tốc hơn 27.500 tỷ đồng", None, None),
+    ("Dự án đường băng hơn 3.200 tỷ đồng tại sân bay Phù Cát sắp xong", None, None),
+    ("Phê duyệt chủ trương đầu tư khu đô thị mới 2.000 tỷ đồng tại Quảng Ngãi", None, None),
+    ("Hà Tĩnh chấp thuận chủ trương đầu tư trung tâm logistics 39.600 tỷ đồng", None, None),
+    ("Đà Nẵng sẽ đấu thầu chọn nhà đầu tư Dự án Nhà máy nước Kiểm Lâm 456 tỷ đồng", None, None),
+    ("Carlsberg rót thêm 65 triệu USD vào nhà máy bia lớn nhất châu Á tại Huế", "Huế", "Điều chỉnh / Mở rộng / Tăng vốn"),
+    ("Cấp chứng nhận đầu tư dự án công nghiệp hơn 2.373 tỷ đồng tại Khu công nghiệp Bắc Thạch Hà", "Hà Tĩnh", "Cấp GCN đăng ký đầu tư"),
 ]
 fails = 0
 for title, prov, status in CASES:

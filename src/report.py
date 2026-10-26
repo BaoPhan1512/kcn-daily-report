@@ -24,11 +24,12 @@ LIGHT = colors.HexColor("#F2F5F9")
 GRID = colors.HexColor("#C9D3E0")
 BAND = colors.HexColor("#DCE6F2")
 STATUS_COLORS = {
-    "Đề xuất / Nghiên cứu đầu tư": "#6B7280",
+    "Đề xuất / Nghiên cứu đầu tư": "#DB2777",
     "Chấp thuận chủ trương đầu tư": "#2563EB",
     "Cấp GCN đăng ký đầu tư": "#7C3AED",
-    "Khởi công": "#D97706",
-    "Khánh thành / Đi vào hoạt động": "#059669",
+    "Điều chỉnh / Mở rộng / Tăng vốn": "#0D9488",
+    "Khởi công": "#EA580C",
+    "Khánh thành / Đi vào hoạt động": "#16A34A",
     "Khác": "#9CA3AF",
 }
 STATUS_FLOW = list(STATUS_COLORS)
@@ -50,7 +51,8 @@ def P(text, style=S_CELL):
 
 def _status_cell(status):
     c = STATUS_COLORS.get(status, "#9CA3AF")
-    return Paragraph(f'<font color="{c}"><b>●</b></font> {escape(status)}', S_CELL)
+    dot = "○" if status == "Khác" else "●"  # "Khác" dùng chấm rỗng để khác hẳn các tình trạng có màu
+    return Paragraph(f'<font color="{c}"><b>{dot}</b></font> {escape(status)}', S_CELL)
 
 
 def _link_cell(url, source):
@@ -71,7 +73,7 @@ def _summary_table(items, cfg):
                     + [P(str(by_prov.get(name, 0)), S_CENTER)])
     rows.append([P("Tổng", S_CELL_B)] + [P(str(by_status.get(s, 0)), S_CENTER) for s in STATUS_FLOW]
                 + [P(str(len(items)), S_CENTER)])
-    t = Table(rows, colWidths=[34 * mm] + [32 * mm] * len(STATUS_FLOW) + [18 * mm], repeatRows=1)
+    t = Table(rows, colWidths=[34 * mm] + [30 * mm] * len(STATUS_FLOW) + [16 * mm], repeatRows=1)
     t.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), NAVY),
         ("BACKGROUND", (0, -1), (-1, -1), LIGHT),

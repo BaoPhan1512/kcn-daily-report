@@ -8,7 +8,9 @@ Bot miễn phí, chạy tự động trên GitHub Actions:
 | **06:15** | Gửi file PDF kèm tóm tắt vào Telegram. |
 
 Mỗi dòng trong báo cáo có: **Tên dự án · Tình trạng · Tỉnh (cũ, kèm tỉnh mới) · Chủ đầu tư · 1 link nguồn** (và vốn đầu tư nếu có).
-Tình trạng gồm: Đề xuất / Nghiên cứu đầu tư → Chấp thuận chủ trương đầu tư → Cấp GCN đăng ký đầu tư → Khởi công → Khánh thành / Đi vào hoạt động.
+Tình trạng gồm: Đề xuất / Nghiên cứu đầu tư → Chấp thuận chủ trương đầu tư → Cấp GCN đăng ký đầu tư → Điều chỉnh / Mở rộng / Tăng vốn → Khởi công → Khánh thành / Đi vào hoạt động.
+
+Bot chỉ giữ dự án **sản xuất công nghiệp** và hạ tầng KCN/CCN. Tin về nhà ở, khu đô thị, tái định cư, thương mại, du lịch, giao thông (quốc lộ, cao tốc, sân bay, cảng), logistics, đầu tư công, y tế, giáo dục, lương, nhà máy nước, xử lý rác... bị loại. Danh sách từ khóa lọc nằm trong mục `industry_filter` của `config.json`.
 
 Bot nhớ các dự án đã báo trong 45 ngày nên không lặp lại; một dự án chuyển sang giai đoạn mới (vd. từ chủ trương sang khởi công) sẽ được báo lại.
 
@@ -36,7 +38,7 @@ Từ đó bot tự chạy mỗi ngày. Mọi báo cáo cũ lưu trong thư mục
 
 ## Tùy chỉnh
 
-- `config.json`: tỉnh, tên KCN/KKT/huyện để nhận diện tỉnh cũ, từ khóa tìm kiếm, từ khóa loại trừ, số giờ quét lùi.
+- `config.json`: bộ lọc ngành (`industry_filter`), tỉnh, tên KCN/KKT/huyện để nhận diện tỉnh cũ, từ khóa tìm kiếm, từ khóa loại trừ, số giờ quét lùi.
 - `sites.json`: trang tin của các BQL KCN/KKT. Hãy kiểm tra lại URL (bot tự bỏ qua link chết, xem log trong tab Actions).
 - Kiểm tra bộ phân loại: `python tests/test_classify.py`. Tạo PDF mẫu không cần mạng: `python src/main.py demo`.
 
