@@ -31,7 +31,7 @@ concurrency:
 jobs:
   send:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 330
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -59,6 +59,11 @@ jobs:
           git add data reports
           git commit -m "Đã gửi báo cáo $(TZ=Asia/Ho_Chi_Minh date +%F)" || exit 0
           for i in 1 2 3; do git push && break || (git pull --rebase origin main && sleep 5); done
+      - name: Chuyển tiếp sang lượt chờ mới (nếu còn lâu mới đến giờ gửi)
+        if: hashFiles('.redispatch') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run send.yml --ref main -f auto=true
       - name: Giữ lịch chạy luôn bật (GitHub tự tắt lịch sau 60 ngày repo không hoạt động)
         if: always()
         env:

@@ -47,6 +47,10 @@ jobs:
           git add data reports
           git commit -m "Báo cáo $(TZ=Asia/Ho_Chi_Minh date -d '+6 hours' +%F)" || echo "Không có thay đổi"
           for i in 1 2 3; do git push && break || (git pull --rebase origin main && sleep 5); done
+      - name: Khởi động lượt gửi (tự chờ đến 06:15, không phụ thuộc lịch GitHub hay bị trễ)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run send.yml --ref main -f auto=true
       - name: Giữ lịch chạy luôn bật (GitHub tự tắt lịch sau 60 ngày repo không hoạt động)
         if: always()
         env:

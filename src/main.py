@@ -127,18 +127,37 @@ SEND_AT = (6, 15)        # giờ gửi (giờ VN)
 LAST_TRY = (7, 15)       # sau giờ này mà vẫn chưa có báo cáo thì báo lỗi vào nhóm
 
 
+MAX_WAIT = 5 * 3600      # một lượt chạy GitHub tối đa 6 giờ; chờ lâu hơn thì chuyển tiếp cho lượt mới
+REDISPATCH_FLAG = os.path.join(ROOT, ".redispatch")
+
+
+def next_send_time(now):
+    """Buổi sáng (trước 12h): gửi cho hôm nay; buổi chiều/tối: gửi 06:15 sáng mai."""
+    today_at = now.replace(hour=SEND_AT[0], minute=SEND_AT[1], second=0, microsecond=0)
+    if now.hour < 12:
+        return max(today_at, now)
+    return today_at + timedelta(days=1)
+
+
 def cmd_send():
     chat = os.environ["TELEGRAM_CHAT_ID"]
     now = datetime.now(VN)
     date_str = now.strftime("%Y-%m-%d")
     if SCHEDULED:
+        target = next_send_time(now)
+        date_str = target.strftime("%Y-%m-%d")
         if os.path.exists(marker("sent", date_str)):
             print(f"Báo cáo {date_str} đã gửi ở lượt trước, bỏ qua.")
             return
-        send_at = now.replace(hour=SEND_AT[0], minute=SEND_AT[1], second=0, microsecond=0)
-        if now < send_at:
-            wait = (send_at - now).total_seconds()
-            print(f"Lượt chạy sớm, chờ {wait / 60:.0f} phút đến {SEND_AT[0]:02d}:{SEND_AT[1]:02d}...")
+        wait = (target - now).total_seconds()
+        if wait > MAX_WAIT:
+            # GitHub có thể trễ lịch hàng giờ, nên bot tự chờ trong một lượt đang chạy rồi chuyển tiếp
+            print(f"Còn {wait / 3600:.1f} giờ mới đến giờ gửi, chờ 5 giờ rồi chuyển sang lượt mới.")
+            time.sleep(MAX_WAIT)
+            open(REDISPATCH_FLAG, "w").close()
+            return
+        if wait > 0:
+            print(f"Chờ {wait / 60:.0f} phút đến {SEND_AT[0]:02d}:{SEND_AT[1]:02d}...")
             time.sleep(wait)
     path = pdf_path(date_str)
     if not os.path.exists(path):
@@ -172,7 +191,10 @@ def cmd_send():
 
 def cmd_ensure():
     """Lượt gửi buổi sáng: nếu tối qua lượt thu thập không chạy (GitHub trễ/bỏ lịch) thì thu thập ngay."""
-    date_str = datetime.now(VN).strftime("%Y-%m-%d")
+    now = datetime.now(VN)
+    if now.hour >= 12:
+        return  # buổi tối là việc của lượt thu thập 21:00
+    date_str = now.strftime("%Y-%m-%d")
     if os.path.exists(pdf_path(date_str)) or (SCHEDULED and os.path.exists(marker("sent", date_str))):
         return
     print(f"Chưa có báo cáo {date_str}, thu thập ngay...")
