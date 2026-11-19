@@ -52,7 +52,8 @@ def seen_key(it):
 
 # Lịch của GitHub có thể trễ hoặc bỏ lượt, nên mỗi việc được lên lịch nhiều lần; file đánh dấu
 # giúp chỉ lượt đầu tiên thực sự chạy. Chạy bằng tay (Run workflow) thì luôn chạy.
-SCHEDULED = os.environ.get("GITHUB_EVENT_NAME") == "schedule"
+# AUTO_RUN=true: lượt do bộ hẹn giờ ngoài (cron-job.org) gọi qua API, xử lý như lượt theo lịch.
+SCHEDULED = os.environ.get("GITHUB_EVENT_NAME") == "schedule" or os.environ.get("AUTO_RUN") == "true"
 
 
 def marker(kind, date_str):
@@ -169,6 +170,15 @@ def cmd_send():
     print("Đã gửi Telegram.")
 
 
+def cmd_ensure():
+    """Lượt gửi buổi sáng: nếu tối qua lượt thu thập không chạy (GitHub trễ/bỏ lịch) thì thu thập ngay."""
+    date_str = datetime.now(VN).strftime("%Y-%m-%d")
+    if os.path.exists(pdf_path(date_str)) or (SCHEDULED and os.path.exists(marker("sent", date_str))):
+        return
+    print(f"Chưa có báo cáo {date_str}, thu thập ngay...")
+    cmd_collect()
+
+
 def cmd_chatid():
     """In ra ID các nhóm/người đã nhắn cho bot gần đây (dùng để điền TELEGRAM_CHAT_ID)."""
     token = os.environ["TELEGRAM_BOT_TOKEN"]
@@ -235,4 +245,4 @@ def cmd_demo():
 
 
 if __name__ == "__main__":
-    {"collect": cmd_collect, "send": cmd_send, "demo": cmd_demo, "chatid": cmd_chatid, "check": cmd_check}[sys.argv[1] if len(sys.argv) > 1 else "collect"]()
+    {"collect": cmd_collect, "send": cmd_send, "demo": cmd_demo, "chatid": cmd_chatid, "ensure": cmd_ensure, "check": cmd_check}[sys.argv[1] if len(sys.argv) > 1 else "collect"]()

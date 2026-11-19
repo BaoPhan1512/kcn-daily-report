@@ -49,3 +49,20 @@ Từ đó bot tự chạy mỗi ngày. Mọi báo cáo cũ lưu trong thư mục
 - GitHub có thể chạy lịch trễ 5–20 phút lúc cao điểm; báo cáo vẫn về trước khoảng 06:35.
 - Repo không có hoạt động 60 ngày thì GitHub tắt lịch chạy; bot tự commit báo cáo mỗi ngày nên không bị ảnh hưởng.
 - Sau sáp nhập tỉnh (1/7/2025), báo chí dùng tên tỉnh mới. Bot xác định tỉnh cũ qua tên KCN/KKT/huyện; tin chỉ ghi chung "tỉnh Gia Lai" mà không nói địa danh cụ thể sẽ được xếp vào Gia Lai (cũ).
+
+## Hẹn giờ chính xác bằng cron-job.org (khuyến nghị)
+
+Lịch hẹn giờ có sẵn của GitHub chỉ là "cố gắng": có hôm trễ vài tiếng hoặc bỏ lượt. Bot đã có nhiều lượt dự phòng, nhưng để chắc chắn đúng giờ, hãy cho một dịch vụ hẹn giờ miễn phí bên ngoài "bấm nút" chạy workflow:
+
+1. **Tạo token GitHub**: GitHub → ảnh đại diện → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token. Repository access: *Only select repositories* → `kcn-daily-report`. Permissions → Repository permissions → **Actions: Read and write**. Expiration: dài nhất có thể (đặt nhắc gia hạn). Sao chép token (dạng `github_pat_...`).
+2. Đăng ký miễn phí tại https://cron-job.org, tạo 2 cron job:
+
+| Tên | URL | Giờ (múi giờ Asia/Ho_Chi_Minh) |
+|---|---|---|
+| Thu thập | `https://api.github.com/repos/BaoPhan1512/kcn-daily-report/actions/workflows/collect.yml/dispatches` | 21:00 hằng ngày |
+| Gửi | `https://api.github.com/repos/BaoPhan1512/kcn-daily-report/actions/workflows/send.yml/dispatches` | 05:55 hằng ngày |
+
+   Mỗi job, tab **Advanced**: Request method **POST**; Headers: `Authorization: Bearer <token>`, `Accept: application/vnd.github+json`, `X-GitHub-Api-Version: 2022-11-28`; Request body: `{"ref":"main","inputs":{"auto":"true"}}`.
+3. Bấm **Test run**: thấy mã **204** là thành công.
+
+Lượt gửi 05:55 sẽ tự chờ đến đúng 06:15 mới gửi; các lượt lịch GitHub vẫn giữ làm dự phòng và tự bỏ qua nếu đã gửi.

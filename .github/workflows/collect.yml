@@ -7,7 +7,12 @@ on:
     - cron: "0 14 * * *"
     - cron: "40 14 * * *"
     - cron: "30 15 * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      auto:
+        description: "true = lượt tự động từ bộ hẹn giờ ngoài (tự chờ đúng giờ, không chạy trùng)"
+        required: false
+        default: "false"
 
 permissions:
   contents: write
@@ -33,6 +38,7 @@ jobs:
       - name: Thu thập, phân loại, xuất PDF
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          AUTO_RUN: ${{ inputs.auto }}
         run: python src/main.py collect
       - name: Lưu báo cáo vào repo
         run: |
