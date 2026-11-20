@@ -25,7 +25,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: kcn-report
+  group: kcn-send  # tách riêng: lượt gửi chờ nhiều giờ không được chặn lượt thu thập
   cancel-in-progress: false
 
 jobs:
